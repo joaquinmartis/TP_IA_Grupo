@@ -1,8 +1,5 @@
 import time
 import numpy as np
-import matplotlib.pyplot as plt
-
-from sklearn.preprocessing import MinMaxScaler
 from substractive_clustering import substractive_clustering
 #from substractive_clustering_original import subclust2 as substractive_clustering
 from reglas_fis import FISRule
@@ -21,11 +18,11 @@ class FIS:
     def __gaussmf(self,data, mean, sigma):
         return np.exp(-((data - mean)**2.) / (2 * sigma**2.))
 
-    def genFIS(self, data, radii):
+    def genFIS(self, data, Ra=1.1,Rb=0):
 
         start_time = time.time()
         #Clustering con los datos y clasificacion de cada punto a un cluster
-        labels, cluster_center = substractive_clustering(data, radii)
+        labels, cluster_center = substractive_clustering(data, Ra,Rb=Rb)
 
         print("--- %s seconds ---" % (time.time() - start_time))
         n_clusters = len(cluster_center)
@@ -39,6 +36,7 @@ class FIS:
         self.inputs = [FISInput(maxValue[i], minValue[i],cluster_center[:,i]) for i in range(len(maxValue))]
         self.rules = cluster_center
         self.entrenar(data)
+        return labels,n_clusters
 
     
     
@@ -80,7 +78,11 @@ class FIS:
 
     def evalFIS(self, data):
         sigma = np.array([(input.maxValue-input.minValue) for input in self.inputs])/np.sqrt(8)
+
+        #Vector con vectores de valores de verdad de cada punto de los cluster
         f = [np.prod(self.__gaussmf(data,cluster,sigma),axis=1) for cluster in self.rules]
+
+        
         nivel_acti = np.array(f).T
         sumMu = np.vstack(np.sum(nivel_acti,axis=1))
 
