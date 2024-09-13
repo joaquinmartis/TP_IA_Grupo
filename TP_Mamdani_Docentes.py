@@ -151,7 +151,6 @@ def calcula_aumento_nota_difuso(nota_examen=7,nota_concepto="Bueno"):
     ne_in_muy_alta = fuzz.interp_membership(ne, ne_f_pert_muy_alta, nota_examen)
 
     vec_rules_negativo=[
-
         np.fmin(ne_in_media, nc_f_pert_regular),        #Nota media y concepto Regular -> nota negativo
         np.fmin(ne_in_media_alta, nc_f_pert_regular),   #Nota media-alta y concepto Regular -> nota negativo
         np.fmin(ne_in_alta, nc_f_pert_regular),         #Nota alta y concepto Regular -> nota negativo
@@ -176,6 +175,10 @@ def calcula_aumento_nota_difuso(nota_examen=7,nota_concepto="Bueno"):
         np.fmin(ne_in_alta, nc_f_pert_excelente),       #Nota alta y concepto Excelente -> nota positiva
         np.fmin(ne_in_muy_alta, nc_f_pert_excelente)    #Nota muy alta y concepto Excelente -> nota positiva
     ]
+
+
+    #alfa=0.25
+    #operacion_salida = alfa*operacionAND(vec_rules_positivo) + (1-alfa)*operacionOR(vec_rules_positivo)
 
     activacion_y_negativo=[np.fmin(y_negativo,rule) for rule in vec_rules_negativo]
     activacion_y_neutro=[np.fmin(y_neutro,rule) for rule in vec_rules_neutral]
@@ -212,17 +215,16 @@ def calcula_aumento_nota_difuso(nota_examen=7,nota_concepto="Bueno"):
     return incremento_nota
 
 def calcula_nota_final(nota_examen,concepto):
-    nota_final= np.round(nota_examen/10+calcula_aumento_nota_difuso(nota_examen=nota_examen,nota_concepto=concepto), 2)
+    nota_final= np.round(nota_examen/10+calcula_aumento_nota_difuso(nota_examen=nota_examen,nota_concepto=concepto))
 
     #Si la nota se pasa de 10 entonces le queda un 10
     return min(10,nota_final)
 
 def main():
-    nota_examen=80
+    nota_examen=90
     concepto="Excelente"
+    impacto_concepto=10
     nota_final=calcula_nota_final(nota_examen,concepto)
     print(nota_final)
-
-    pass
 
 main()
