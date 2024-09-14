@@ -280,9 +280,9 @@ def main():
         entrada = input("Error: ingrese correctamente la nota de concepto (regular/bueno/excelente): ").capitalize()
     concepto= entrada
 
-    entrada = input("Ingrese el máximo impacto en el concepto (4,20): ").capitalize()
-    while not( str.isdigit(entrada) and  4<= int(entrada) <= 20  ):
-        entrada = input("Error: ingrese correctamente el máximo impacto en el concepto (4-20):: ").capitalize()
+    entrada = input("Ingrese el máximo impacto en el concepto (1,20): ").capitalize()
+    while not( str.isdigit(entrada) and  1<= int(entrada) <= 20  ):
+        entrada = input("Error: ingrese correctamente el máximo impacto en el concepto (1-20):: ").capitalize()
     impacto_concepto= int(entrada)
 
     nota_final=calcula_nota_final(nota_examen,concepto,impacto_concepto)
