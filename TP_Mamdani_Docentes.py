@@ -74,15 +74,15 @@ def f_pert_decremento_nota_final(incremento_nota,impacto_concepto):
     return fuzz.sigmf(incremento_nota,centro,ancho)
 
 def f_pert_decrementoModerado_nota_final(incremento_nota,impacto_concepto):
-    inicio= - int(impacto_concepto*0.5)
-    pico=-int(impacto_concepto*0.25)
+    inicio= - np.round(impacto_concepto*0.5)
+    pico=-np.round(impacto_concepto*0.25)
     fin= 0
     return fuzz.trimf(incremento_nota, [inicio, pico, fin])
 
 def f_pert_incrementoModerado_nota_final(incremento_nota,impacto_concepto):
     inicio= 0
-    pico= int(impacto_concepto*0.25)
-    fin=int(impacto_concepto*0.5)
+    pico= np.round(impacto_concepto*0.25)
+    fin=np.round(impacto_concepto*0.5)
     return fuzz.trimf(incremento_nota, [inicio, pico, fin])
 
 def f_pert_incremento_nota_final(incremento_nota,impacto_concepto):
@@ -241,6 +241,7 @@ def calcula_aumento_nota_difuso(nota_examen,nota_concepto,impacto_concepto):
     ax3.fill_between(y, y0, mf_actpos, facecolor='r', alpha=0.7)
 
     ax3.set_title("Inferencia y agregacion parcial")
+    ax3.set_ylim([0, 1+0.1])
     ax3.legend()
     plt.tight_layout()
     plt.show(block=False)
@@ -253,7 +254,7 @@ def calcula_aumento_nota_difuso(nota_examen,nota_concepto,impacto_concepto):
     ax4.plot(y,  resultado_de_agregacion, 'g', linewidth=1.5)
     ax4.fill_between(y, y0, resultado_de_agregacion, facecolor='g', alpha=0.7)
     ax4.plot([incremento_nota, incremento_nota], [0, fuzz.interp_membership(y, resultado_de_agregacion, incremento_nota)], 'k', linewidth=1.5, alpha=0.9)
-    #ax0.title("Salida de la regla difusa")
+    ax4.set_ylim([0, 1+0.1])
     ax4.legend()
     ax4.set_title("Agregacion y desfuzzificacion")
     plt.show(block=False)
