@@ -259,7 +259,7 @@ def calcula_aumento_nota_difuso(nota_examen,nota_concepto,impacto_concepto):
     plt.show(block=False)
 
     
-    return incremento_nota
+    return np.round(incremento_nota)
 
 def calcula_nota_final(nota_examen,concepto,impacto_concepto):
     nota_final= int(np.trunc(nota_examen+calcula_aumento_nota_difuso(nota_examen,concepto,impacto_concepto)))
