@@ -135,7 +135,7 @@ def calcula_aumento_nota_difuso(nota_examen,nota_concepto,impacto_concepto):
     plt.show(block=False)
 
     #Se define el conjunto soporte para la nota de examen
-    y=np.arange(-impacto_concepto,impacto_concepto,1)
+    y=np.arange(-impacto_concepto,impacto_concepto+1,1)
 
     #Se establecen las funciones de pertenencia para la salida
     y_negativo=f_pert_decremento_nota_final(y,impacto_concepto)
@@ -149,7 +149,6 @@ def calcula_aumento_nota_difuso(nota_examen,nota_concepto,impacto_concepto):
     ax2.plot(y,  y_negativomoderado, 'g', linewidth=1.5, label='Negativo moderado')
     ax2.plot(y,  y_positivomoderado, 'y', linewidth=1.5, label='Positivo moderado')
     ax2.plot(y, y_positivo, 'r', linewidth=1.5, label='Considerado')
-    plt.xlim(-impacto_concepto, impacto_concepto)
     ax2.legend()
     ax2.set_title("Cambio de nota")
     plt.tight_layout()
@@ -280,9 +279,9 @@ def main():
         entrada = input("Error: ingrese correctamente la nota de concepto (regular/bueno/excelente): ").capitalize()
     concepto= entrada
 
-    entrada = input("Ingrese el máximo impacto en el concepto (5,20): ").capitalize()
-    while not( str.isdigit(entrada) and  5 <= int(entrada) <= 20  ):
-        entrada = input("Error: ingrese correctamente el máximo impacto en el concepto (0-10):: ").capitalize()
+    entrada = input("Ingrese el máximo impacto en el concepto (4,20): ").capitalize()
+    while not( str.isdigit(entrada) and  4<= int(entrada) <= 20  ):
+        entrada = input("Error: ingrese correctamente el máximo impacto en el concepto (4-20):: ").capitalize()
     impacto_concepto= int(entrada)
 
     nota_final=calcula_nota_final(nota_examen,concepto,impacto_concepto)
