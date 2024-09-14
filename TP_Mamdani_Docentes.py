@@ -101,7 +101,7 @@ def calcula_aumento_nota_difuso(nota_examen,nota_concepto,impacto_concepto):
         nota_examen: Entrada para la regla difusa relativa a la nota del examen del alumno. Rango: [0,100]
         nota_concepto: Entrada para la regla difusa relativa al concepto del alumno: Puede tomar valor "Regular", "Bueno", "Excelente"
 
-        @return: La funcion retorna el redondeo que se aplica sobre la nota. Rango [0,impacto_concepto]
+        @return: La funcion retorna el cambio de nota que se aplica sobre la nota. Rango [0,impacto_concepto]
     """
 
     #Calculo de los valores de verdad de nota de concepto
@@ -129,6 +129,7 @@ def calcula_aumento_nota_difuso(nota_examen,nota_concepto,impacto_concepto):
     ax1.plot(x_nota, ne_f_pert_media_alta, 'c', linewidth=1.5, label='Media alta')
     ax1.plot(x_nota, ne_f_pert_alta, 'm', linewidth=1.5, label='Alta')
     ax1.plot(x_nota, ne_f_pert_muy_alta, 'y', linewidth=1.5, label='Muy alta')
+    ax1.set_title("Nota de examen")
     ax1.legend()
     plt.tight_layout()
     plt.show(block=False)
@@ -142,7 +143,7 @@ def calcula_aumento_nota_difuso(nota_examen,nota_concepto,impacto_concepto):
     y_positivomoderado=f_pert_incrementoModerado_nota_final(y,impacto_concepto)
     y_positivo=f_pert_incremento_nota_final(y,impacto_concepto)
 
-    #Se muestran las funciones de pertenencia asociadas a los redondeos: negativo, negativo moderado, positivo moderado o considerado
+    #Se muestran las funciones de pertenencia asociadas a los cambios de nota: negativo, negativo moderado, positivo moderado o considerado
     fig, ax2 = plt.subplots(figsize=(8, 3))    
     ax2.plot(y, y_negativo, 'b', linewidth=1.5, label='Negativo')
     ax2.plot(y,  y_negativomoderado, 'g', linewidth=1.5, label='Negativo moderado')
@@ -150,6 +151,7 @@ def calcula_aumento_nota_difuso(nota_examen,nota_concepto,impacto_concepto):
     ax2.plot(y, y_positivo, 'r', linewidth=1.5, label='Considerado')
     plt.xlim(-impacto_concepto, impacto_concepto)
     ax2.legend()
+    ax2.set_title("Cambio de nota")
     plt.tight_layout()
     plt.show(block=False)
 
@@ -167,48 +169,48 @@ def calcula_aumento_nota_difuso(nota_examen,nota_concepto,impacto_concepto):
     """
     Metodología del profesor:
         -Con las notas bajas y media bajas se es muy exigente: el concepto negativo resta mucho y el concepto bien o excelente suman muy poco a la nota
-        -Las notas medias se consideran muy sencibles, ya que segun esta nota el alumno puede aprobar o desaprobar: el concepto regular descuenta moderadamente, el concepto bien aumenta moderadamente y el concepto excelente suma mucho
-        -El profesor considera que las notas medias altas y altas son poco relevantes en redondeo, pero de ellas se espera que el concepto sea bueno. Por lo tanto un concepto regular resta mucho y el concepto bien y excelente suma poco
+        -Las notas medias se consideran muy sensibles, ya que segun esta nota el alumno puede aprobar o desaprobar: el concepto regular descuenta moderadamente, el concepto bien aumenta moderadamente y el concepto excelente suma mucho
+        -El profesor considera que las notas medias altas y altas son poco relevantes en el cambio de nota, pero de ellas se espera que el concepto sea bueno. Por lo tanto un concepto regular resta mucho y el concepto bien y excelente suma poco
         -Por ultimo, las notas muy altas son muy estimadas por el profesor, por lo tanto el concepto resta muy poco y el concepto bien y excelente suman mucho.
     """
     
     vec_rules_negativo=[
-        np.fmin(ne_in_baja, nc_f_pert_regular),         #Nota baja y concepto Regular -> redondeo negativo
+        np.fmin(ne_in_baja, nc_f_pert_regular),         #Nota baja y concepto Regular -> cambio negativo
 
-        np.fmin(ne_in_media_baja, nc_f_pert_regular),   #Nota media-baja y concepto Regular -> redondeo negativo
+        np.fmin(ne_in_media_baja, nc_f_pert_regular),   #Nota media-baja y concepto Regular -> cambio negativo
 
-        np.fmin(ne_in_media_alta, nc_f_pert_regular),   #Nota media-alta y concepto Regular -> redondeo negativo
+        np.fmin(ne_in_media_alta, nc_f_pert_regular),   #Nota media-alta y concepto Regular -> cambio negativo
 
-        np.fmin(ne_in_alta, nc_f_pert_regular),         #Nota alta y concepto Regular -> redondeo negativo
+        np.fmin(ne_in_alta, nc_f_pert_regular),         #Nota alta y concepto Regular -> cambio negativo
     ]
 
     vec_rules_negativo_moderado=[
-        np.fmin(ne_in_media, nc_f_pert_regular),        #Nota media y concepto Regular -> redondeo -moderado
-        np.fmin(ne_in_muy_alta, nc_f_pert_regular),     #Nota muy alta y concepto Regular -> redondeo -moderado
+        np.fmin(ne_in_media, nc_f_pert_regular),        #Nota media y concepto Regular -> cambio -moderado
+        np.fmin(ne_in_muy_alta, nc_f_pert_regular),     #Nota muy alta y concepto Regular -> cambio -moderado
     ]
 
     vec_rules_positivo_moderado=[
-        np.fmin(ne_in_baja, nc_f_pert_excelente),       #Nota baja y concepto Excelente -> redondeo +moderado  
-        np.fmin(ne_in_baja, nc_f_pert_bueno),           #Nota baja y concepto Bueno -> redondeo +moderado
+        np.fmin(ne_in_baja, nc_f_pert_excelente),       #Nota baja y concepto Excelente -> cambio +moderado  
+        np.fmin(ne_in_baja, nc_f_pert_bueno),           #Nota baja y concepto Bueno -> cambio +moderado
 
-        np.fmin(ne_in_media_baja, nc_f_pert_excelente), #Nota media-baja y concepto Excelente -> redondeo +moderado
-        np.fmin(ne_in_media_baja, nc_f_pert_bueno),     #Nota media-baja y concepto Bueno -> redondeo +moderado
+        np.fmin(ne_in_media_baja, nc_f_pert_excelente), #Nota media-baja y concepto Excelente -> cambio +moderado
+        np.fmin(ne_in_media_baja, nc_f_pert_bueno),     #Nota media-baja y concepto Bueno -> cambio +moderado
 
-        np.fmin(ne_in_media, nc_f_pert_bueno),          #Nota media y concepto Bueno -> redondeo +moderado
+        np.fmin(ne_in_media, nc_f_pert_bueno),          #Nota media y concepto Bueno -> cambio +moderado
 
-        np.fmin(ne_in_media_alta, nc_f_pert_bueno),     #Nota media-alta y concepto Bueno -> redondeo +moderado
-        np.fmin(ne_in_media_alta, nc_f_pert_excelente), #Nota media-alta y concepto Excelente -> redondeo +moderado
+        np.fmin(ne_in_media_alta, nc_f_pert_bueno),     #Nota media-alta y concepto Bueno -> cambio +moderado
+        np.fmin(ne_in_media_alta, nc_f_pert_excelente), #Nota media-alta y concepto Excelente -> cambio +moderado
 
-        np.fmin(ne_in_alta, nc_f_pert_bueno),           #Nota alta y concepto Bueno -> redondeo +moderado
-        np.fmin(ne_in_alta, nc_f_pert_excelente),       #Nota alta y concepto Excelente -> redondeo +moderado
+        np.fmin(ne_in_alta, nc_f_pert_bueno),           #Nota alta y concepto Bueno -> cambio +moderado
+        np.fmin(ne_in_alta, nc_f_pert_excelente),       #Nota alta y concepto Excelente -> cambio +moderado
     ]
     
     vec_rules_positivo=[
-        np.fmin(ne_in_media, nc_f_pert_excelente),      #Nota media y concepto Excelente -> redondeo considerado
+        np.fmin(ne_in_media, nc_f_pert_excelente),      #Nota media y concepto Excelente -> cambio considerado
 
 
-        np.fmin(ne_in_muy_alta, nc_f_pert_bueno),       #Nota muy alta y concepto Bueno -> redondeo considerado
-        np.fmin(ne_in_muy_alta, nc_f_pert_excelente)    #Nota muy alta y concepto Excelente -> redondeo considerado
+        np.fmin(ne_in_muy_alta, nc_f_pert_bueno),       #Nota muy alta y concepto Bueno -> cambio considerado
+        np.fmin(ne_in_muy_alta, nc_f_pert_excelente)    #Nota muy alta y concepto Excelente -> cambio considerado
     ]
 
 
@@ -220,56 +222,66 @@ def calcula_aumento_nota_difuso(nota_examen,nota_concepto,impacto_concepto):
     
     fig, ax3 = plt.subplots(figsize=(8, 3))
     
-    ax3.plot(y, maximo_de_las_reglas(activacion_y_negativo), 'b', linewidth=1.5, label='Negativo')
-    ax3.plot(y, maximo_de_las_reglas(activacion_y_negmoderado), 'g', linewidth=1.5, label='Negativo Moderado')
-    ax3.plot(y, maximo_de_las_reglas(activacion_y_posmoderado), 'y', linewidth=1.5, label='Positivo Moderado')
-    ax3.plot(y, maximo_de_las_reglas(activacion_y_positivo), 'r', linewidth=1.5, label='Positivo')
-    # ax0.title('Salida de la regla difusa')
+    y0=np.zeros_like(y)
+
+    mf_actneg=maximo_de_las_reglas(activacion_y_negativo)
+    mf_actnegmod=maximo_de_las_reglas(activacion_y_negmoderado)
+    mf_actposmod= maximo_de_las_reglas(activacion_y_posmoderado)
+    mf_actpos= maximo_de_las_reglas(activacion_y_positivo)
+
+    ax3.plot(y, mf_actneg, 'b', linewidth=1.5, label='Negativo')
+    ax3.fill_between(y, y0, mf_actneg, facecolor='b', alpha=0.7)
+
+    ax3.plot(y,mf_actnegmod , 'g', linewidth=1.5, label='Negativo Moderado')
+    ax3.fill_between(y, y0, mf_actnegmod, facecolor='g', alpha=0.7)
+    
+    ax3.plot(y, mf_actposmod, 'y', linewidth=1.5, label='Positivo Moderado')
+    ax3.fill_between(y, y0, mf_actposmod, facecolor='y', alpha=0.7) 
+
+    ax3.plot(y, mf_actpos, 'r', linewidth=1.5, label='Positivo')
+    ax3.fill_between(y, y0, mf_actpos, facecolor='r', alpha=0.7)
+
+    ax3.set_title("Inferencia y agregacion parcial")
     ax3.legend()
     plt.tight_layout()
     plt.show(block=False)
 
     resultado_de_inferencia=activacion_y_negativo+activacion_y_negmoderado+activacion_y_posmoderado+activacion_y_positivo
     resultado_de_agregacion= maximo_de_las_reglas (resultado_de_inferencia)
+    incremento_nota=fuzz.defuzz(y, resultado_de_agregacion, 'centroid')
+
     fig, ax4 = plt.subplots(figsize=(8, 3))
-    ax4.plot(y,  resultado_de_agregacion, 'b', linewidth=1.5, label='positivo')
+    ax4.plot(y,  resultado_de_agregacion, 'g', linewidth=1.5)
+    ax4.fill_between(y, y0, resultado_de_agregacion, facecolor='g', alpha=0.7)
+    ax4.plot([incremento_nota, incremento_nota], [0, fuzz.interp_membership(y, resultado_de_agregacion, incremento_nota)], 'k', linewidth=1.5, alpha=0.9)
     #ax0.title("Salida de la regla difusa")
     ax4.legend()
-    plt.tight_layout()
+    ax4.set_title("Agregacion y desfuzzificacion")
     plt.show(block=False)
 
     
-    incremento_nota=fuzz.defuzz(y, resultado_de_agregacion, 'centroid')
-
     return incremento_nota
 
 def calcula_nota_final(nota_examen,concepto,impacto_concepto):
     nota_final= int(np.trunc(nota_examen+calcula_aumento_nota_difuso(nota_examen,concepto,impacto_concepto)))
 
-    #Si la nota se pasa de 10 entonces le queda un 10
-    return min(100,nota_final)
+    #Si la nota se pasa de 10 entonces le queda un 10 o si la nota es menor a 0, le queda un 0
+    return max(0,min(100,nota_final))
 
 def main():
-    
-    nota_examen=90
     
     entrada = input("Ingrese la nota de examen (0-100): ")
     while not( str.isdigit(entrada) and  0 <= int(entrada) <= 100 ):
         entrada = input("Error: ingrese correctamente la nota de examen (0,100): ")
     nota_examen= int(entrada)
 
-    concepto="Excelente"
-
     entrada = input("Ingrese la nota de concepto (regular/bueno/excelente): ").capitalize()
     while not( entrada in ["Excelente", "Regular", "Bueno"] ):
         entrada = input("Error: ingrese correctamente la nota de concepto (regular/bueno/excelente): ").capitalize()
     concepto= entrada
-    
 
-    impacto_concepto=10
-
-    entrada = input("Ingrese el máximo impacto en el concepto (1,20): ").capitalize()
-    while not( str.isdigit(entrada) and  0 < int(entrada) <= 20  ):
+    entrada = input("Ingrese el máximo impacto en el concepto (5,20): ").capitalize()
+    while not( str.isdigit(entrada) and  5 <= int(entrada) <= 20  ):
         entrada = input("Error: ingrese correctamente el máximo impacto en el concepto (0-10):: ").capitalize()
     impacto_concepto= int(entrada)
 
