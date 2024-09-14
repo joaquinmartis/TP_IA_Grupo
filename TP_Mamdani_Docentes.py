@@ -74,15 +74,15 @@ def f_pert_decremento_nota_final(incremento_nota,impacto_concepto):
     return fuzz.sigmf(incremento_nota,centro,ancho)
 
 def f_pert_decrementoModerado_nota_final(incremento_nota,impacto_concepto):
-    inicio= -impacto_concepto*0.5
-    pico=-impacto_concepto*0.25
+    inicio= - int(impacto_concepto*0.5)
+    pico=-int(impacto_concepto*0.25)
     fin= 0
     return fuzz.trimf(incremento_nota, [inicio, pico, fin])
 
 def f_pert_incrementoModerado_nota_final(incremento_nota,impacto_concepto):
     inicio= 0
-    pico= impacto_concepto*0.25
-    fin=impacto_concepto*0.5
+    pico= int(impacto_concepto*0.25)
+    fin=int(impacto_concepto*0.5)
     return fuzz.trimf(incremento_nota, [inicio, pico, fin])
 
 def f_pert_incremento_nota_final(incremento_nota,impacto_concepto):
