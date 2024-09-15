@@ -11,11 +11,14 @@ from scipy.spatial import distance_matrix
 def substractive_clustering(datos, Ra, Rb=0, AcceptRatio=0.3, RejectRatio=0.1):
     """ 
     datos: matriz con los datos para trabajar
-    Ra: Es un hiperparametro que determina el radio de pertenencia a un centro de cluster. Mayor Ra mayor radio, menor Ra manor radio
-    Rb: Es un hiperparametro que determina cuanto potencial se le resta a cada punto "cercano" a un centro de cluster. Es una medida del "impacto" de cada centro de cluster al serle adjudicado potencial 0
+    Ra: Es un hiperparametro que Define la vecindad en la cual se considera que los puntos cercanos a un centro potencial contribuyen significativamente a la formación de un nuevo centro
+        - Más pequeño: genera más centros de clusters (más grupos).
+        + Más grande: genera menos clusters porque se considerará una mayor cantidad de puntos dentro de la misma influencia.
+        * Generalmente se encuentra en un rango entre 0.2 y 1.5 (depende del conjunto de datos)
+    Rb: Es un hiperparametro que determina cuanto potencial se le resta a cada punto "cercano" a un centro de cluster recien definido.
         -Rb>Ra para que los centros de cluster no se encuentren mur cercanos
-    AcceptRatio: Valor para algoritmo de aceptacion de clusters
-    RejectRatio: Idem AcceptRatio
+    AcceptRatio: Este parámetro define el umbral sobre la densidad que debe superar un centro potencial para ser aceptado como un centro válido de cluster.
+    RejectRatio: Si la densidad de un centro potencial es menor que este umbral en relación con la máxima densidad, el candidato será rechazado como centro de cluster.
     """
     #Si el valor de Rb es por defecto o 0 se le asigna un valor para cumplir Rb>Ra
     if Rb==0:
