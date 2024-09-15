@@ -18,7 +18,7 @@ class Clustering:
         self.vec_pertenencia=kmeans.labels_
         self.vec_reglas=kmeans.cluster_centers_
 
-    def substractive(self, Ra, Rb=0, AcceptRatio=0.3, RejectRatio=0.1):
+    def substractive(self, Ra, Rb=0):
         """
         Ra: Es un hiperparametro que determina el radio de pertenencia a un centro de cluster. Mayor Ra mayor radio, menor Ra manor radio
         Rb: Es un hiperparametro que determina cuanto potencial se le resta a cada punto "cercano" a un centro de cluster. Es una medida del "impacto" de cada centro de cluster al serle adjudicado potencial 0
@@ -26,5 +26,5 @@ class Clustering:
         AcceptRatio: Valor para algoritmo de aceptacion de clusters
         RejectRatio: Idem AcceptRatio
         """
-        self.vec_pertenencia, self.vec_reglas  = substractive_clustering(self.data, Ra, Rb, AcceptRatio, RejectRatio)
+        self.vec_pertenencia, self.vec_reglas  = substractive_clustering(self.data, Ra, Rb)
         self.cant_reglas=len(self.vec_reglas)
