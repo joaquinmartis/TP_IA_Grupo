@@ -6,6 +6,19 @@ import datetime as dt
 from fis import *
 from clustering import Clustering
 from Sugeno import Sugeno
+import json
+
+
+
+
+def generar_datos_futuros(datos,cantidad):
+	tamano=len(datos)
+	datos_nuevos=np.array([])
+	for i in range(cantidad):
+		np.append(datos_nuevos,(datos[tamano-1]+i))
+	return np.concatenate(datos,datos_nuevos)
+
+
 
 
 def leer_datos(ruta_archivo):
@@ -63,7 +76,7 @@ def holdout_repetido(X, y,Ra, n_splits=5, n_repeats=10, test_size=0.3):
 def main():
 	
 	datos_x, datos_y, datos_x_fechas = leer_datos('spy.csv')
-
+	print(datos_x)
 	# Graficar los datos
 	plt.figure(figsize=(12, 6))
 	plt.plot(datos_x_fechas, datos_y , label='Precio de Cierre', color='b')
@@ -95,24 +108,73 @@ def main():
 	MSE_HoldOutRepetido=[]
 	modelos=[]
 
-	for regla in vec_reglas:
+	
+	try:
+		with open('MSE_Holdoutrepetido.json', 'r') as file:
+			MSE_HoldOutRepetido = json.load(file)
+
+		try: 
+			with open('MSE_Resustitucion.json', 'r') as file:
+				MSE_Resustitucion = json.load(file)
+			for regla in vec_reglas:
+
+				clustering_method = Clustering(datos)
+				print("vuelta 1")
+				### KMeans
+				# clustering_method.kmeans(datos, 3)
+				## Subtractive
+				clustering_method.substractive(regla["Ra"])
+				sgno = Sugeno()
+				sgno.generar_fis(datos, clustering_method.vec_reglas)
+				r = sgno.evalFIS(np.vstack(datos_x))
+				print("vuelta 1.1")
+				modelos.append(sgno)
+
+		except FileNotFoundError:
+				for regla in vec_reglas:
+
+					clustering_method = Clustering(datos)
+					print("vuelta 1")
+					### KMeans
+					# clustering_method.kmeans(datos, 3)
+					## Subtractive
+					clustering_method.substractive(regla["Ra"])
+					sgno = Sugeno()
+					sgno.generar_fis(datos, clustering_method.vec_reglas)
+					r = sgno.evalFIS(np.vstack(datos_x))
+					MSE_Resustitucion.append(calcular_error_cuadratico_medio(np.array(datos_y), r))
+					print("vuelta 1.1")
+					modelos.append(sgno)
+
+					with open("MSE_Resustitucion.json","w")as file:
+						json.dump(MSE_Resustitucion, file)	
 		
-		clustering_method = Clustering(datos)
-		print("vuelta 1")
-		### KMeans
-		# clustering_method.kmeans(datos, 3)
-		## Subtractive
-		clustering_method.substractive(regla["Ra"])
-		sgno = Sugeno()
-		sgno.generar_fis(datos, clustering_method.vec_reglas)
-		r = sgno.evalFIS(np.vstack(datos_x))
-		MSE_Resustitucion.append(calcular_error_cuadratico_medio(np.array(datos_y), r))
-		MSE_HoldOutRepetido.append(holdout_repetido(datos_x, datos_y,regla["Ra"]))
-		print("vuelta 1.1")
-		modelos.append(sgno)
-		
+	except FileNotFoundError:
+
+		for regla in vec_reglas:
+
+			clustering_method = Clustering(datos)
+			print("vuelta 1")
+			### KMeans
+			# clustering_method.kmeans(datos, 3)
+			## Subtractive
+			clustering_method.substractive(regla["Ra"])
+			sgno = Sugeno()
+			sgno.generar_fis(datos, clustering_method.vec_reglas)
+			r = sgno.evalFIS(np.vstack(datos_x))
+			MSE_Resustitucion.append(calcular_error_cuadratico_medio(np.array(datos_y), r))
+			MSE_HoldOutRepetido.append(holdout_repetido(datos_x, datos_y,regla["Ra"]))
+			print("vuelta 1.1")
+			modelos.append(sgno)
+
+		with open("MSE_Holdoutrepetido.json","w")as file:
+			json.dump(MSE_HoldOutRepetido, file)
+		with open("MSE_Resustitucion.json","w")as file:
+			json.dump(MSE_Resustitucion, file)	
+
 	
 	#Graficar el error cuadratico medio (x=radioA y=error cuadratico medio)
+
 	plt.plot([regla["Ra"] for regla in vec_reglas], MSE_Resustitucion)
 	plt.xlabel("Ra")
 	plt.ylabel("Error cuadrático medio Resustitución")
@@ -141,6 +203,25 @@ def main():
 	plt.show()
 
 	#extrapolacion es hacer un for creando datos desde el ultimo dato conocido... se puede poner una barra para identificar donde comienza
+
+	#Inicio extrapolacion
+	#datos_futuros_x=generar_datos_futuros(datos_x,1000)
+	#recta_extrapolacion=mejor_modelo.evalFIS(datos_futuros_x)
+	#plt.figure()
+	#plt.plot(datos_futuros_x, datos_x, color='blue')
+	#plt.plot(datos_futuros_x, recta_extrapolacion , label='Recta extrapolacion', color='r')
+	#lt.xlabel("Años")
+	#plt.ylabel("Valor de cierre")
+	#plt.show()
+
+
+
+
+
+
+
+
+
 	input("Presione enter para finalizar")	
 
 
