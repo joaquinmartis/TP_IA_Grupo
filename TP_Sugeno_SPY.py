@@ -159,15 +159,15 @@ def main():
 			modelos.append(sgno)
 			
 	try:
-		escritura = MSE_HoldOutRepetido - MSE_HoldOutRepetido_Arch
+		escritura = set(MSE_HoldOutRepetido) - set(MSE_HoldOutRepetido_Arch)
 		with open("MSE_Holdoutrepetido.json","w")as file:
-			json.dump(escritura, file)
-		escritura = MSE_Resustitucion-MSE_Resustitucion_Arch
+			json.dump(list(escritura), file)
+		escritura = set(MSE_Resustitucion)-set(MSE_Resustitucion_Arch)
 		with open("MSE_Resustitucion.json","w")as file:
-			json.dump(escritura, file)	
-		escritura = vec_reglas-Ra
+			json.dump(list(escritura), file)	
+		escritura = set(vec_reglas)-set(Ra)
 		with open("Ra.json", "w") as file:
-			json.dump(escritura, file)
+			json.dump(list(escritura), file)
 	except FileNotFoundError:
 		print("no se pudo guardar info en archivos")
 	
