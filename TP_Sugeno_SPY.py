@@ -206,11 +206,16 @@ def main():
 	datos_futuros_x=generar_datos_futuros(datos_x,100)
 	print(datos)
 	recta_extrapolacion=mejor_modelo.evalFIS(np.vstack(datos_futuros_x))
+
+
+	fecha_final_real=datos_x_fechas[0] + pd.to_timedelta(datos_x[-1], unit='D')
 	plt.figure()
-	plt.plot([datos_x_fechas[0] + pd.to_timedelta(d, unit='D') for d in datos_x], datos_y, color='blue') #Datos originales
+	plt.plot([datos_x_fechas[0] + pd.to_timedelta(d, unit='D') for d in datos_x], datos_y, label="Valores reales" ,color='blue') #Datos originales
 	plt.plot([datos_x_fechas[0] + pd.to_timedelta(d, unit='D') for d in datos_futuros_x], recta_extrapolacion , label='Recta extrapolacion', color='r') #Datos extrapolados
+	plt.axvline(x=fecha_final_real, color='black', linestyle='--', label='Inicio de Extrapolación')
 	plt.xlabel("Años")
 	plt.ylabel("Valor de cierre")
+	plt.title("Recta de extrapolacion")
 	plt.show()
 
 	input("Presione enter para finalizar")	
