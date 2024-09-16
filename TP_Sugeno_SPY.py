@@ -12,11 +12,9 @@ import json
 
 
 def generar_datos_futuros(datos,cantidad):
-	tamano=len(datos)
-	datos_nuevos=np.array([])
-	for i in range(cantidad):
-		np.append(datos_nuevos,(datos[tamano-1]+i))
-	return np.concatenate(datos,datos_nuevos)
+    ultimo_dato = datos[-1]  # Last known date (in days)
+    datos_nuevos = np.arange(ultimo_dato + 1, ultimo_dato + cantidad + 1)  # Generate future days
+    return np.append(datos, datos_nuevos)  # Combine known and future days
 
 
 
@@ -203,24 +201,17 @@ def main():
 	plt.show()
 
 	#extrapolacion es hacer un for creando datos desde el ultimo dato conocido... se puede poner una barra para identificar donde comienza
-
+	print(mejor_modelo.get_rules())
 	#Inicio extrapolacion
-	#datos_futuros_x=generar_datos_futuros(datos_x,1000)
-	#recta_extrapolacion=mejor_modelo.evalFIS(datos_futuros_x)
-	#plt.figure()
-	#plt.plot(datos_futuros_x, datos_x, color='blue')
-	#plt.plot(datos_futuros_x, recta_extrapolacion , label='Recta extrapolacion', color='r')
-	#lt.xlabel("Años")
-	#plt.ylabel("Valor de cierre")
-	#plt.show()
-
-
-
-
-
-
-
-
+	datos_futuros_x=generar_datos_futuros(datos_x,100)
+	print(datos)
+	recta_extrapolacion=mejor_modelo.evalFIS(np.vstack(datos_futuros_x))
+	plt.figure()
+	plt.plot([datos_x_fechas[0] + pd.to_timedelta(d, unit='D') for d in datos_x], datos_y, color='blue') #Datos originales
+	plt.plot([datos_x_fechas[0] + pd.to_timedelta(d, unit='D') for d in datos_futuros_x], recta_extrapolacion , label='Recta extrapolacion', color='r') #Datos extrapolados
+	plt.xlabel("Años")
+	plt.ylabel("Valor de cierre")
+	plt.show()
 
 	input("Presione enter para finalizar")	
 

@@ -62,3 +62,6 @@ class Sugeno:
     def viewInputs(self):
         for input in self.inputs:
             input.view()
+
+    def get_rules(self):
+        return self.rules
