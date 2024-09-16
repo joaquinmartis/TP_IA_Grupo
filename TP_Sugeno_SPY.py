@@ -88,98 +88,99 @@ def main():
 	
 	datos=np.vstack((datos_x, datos_y)).T
 	
-	vec_reglas=[
-		
-		{"Ra":0.20},
-		{"Ra":0.2},
-		{"Ra":0.4},
-		{"Ra":0.6},
-		{"Ra":1.1},
-		# {"Ra":1, "Rb":0},
-		# {"Ra":0.2, "Rb":0.21},
-		# {"Ra":0.4, "Rb":0.42},
-		# {"Ra":0.6, "Rb":0.63},
-		# {"Ra":0.8, "Rb":0.84},
-	]
+	#Generar valores de Ra en ese rango
+	ra_values = np.arange(0.1, 0.4 + 0.1, 0.1)
+
+	#Crear la lista de reglas de manera dinámica
+	vec_reglas = [round(ra,2) for ra in ra_values]
+
+	
 
 	MSE_Resustitucion=[]
 	MSE_HoldOutRepetido=[]
+	MSE_HoldOutRepetido_Arch=[]
+	MSE_Resustitucion_Arch=[]
 	modelos=[]
+	Ra = []
 
-	
 	try:
+		with open('Ra.json', 'r') as file:
+			Ra = json.load(file)
 		with open('MSE_Holdoutrepetido.json', 'r') as file:
-			MSE_HoldOutRepetido = json.load(file)
-
-		try: 
+			MSE_HoldOutRepetido_Arch = json.load(file) 
+		try:
 			with open('MSE_Resustitucion.json', 'r') as file:
-				MSE_Resustitucion = json.load(file)
-			for regla in vec_reglas:
-
-				clustering_method = Clustering(datos)
-				print("vuelta 1")
-				### KMeans
-				# clustering_method.kmeans(datos, 3)
-				## Subtractive
-				clustering_method.substractive(regla["Ra"])
-				sgno = Sugeno()
-				sgno.generar_fis(datos, clustering_method.vec_reglas)
-				r = sgno.evalFIS(np.vstack(datos_x))
-				print("vuelta 1.1")
-				modelos.append(sgno)
-
+				MSE_Resustitucion_Arch = json.load(file)
+			resistutitucion=True
 		except FileNotFoundError:
-				for regla in vec_reglas:
-
-					clustering_method = Clustering(datos)
-					print("vuelta 1")
-					### KMeans
-					# clustering_method.kmeans(datos, 3)
-					## Subtractive
-					clustering_method.substractive(regla["Ra"])
-					sgno = Sugeno()
-					sgno.generar_fis(datos, clustering_method.vec_reglas)
-					r = sgno.evalFIS(np.vstack(datos_x))
-					MSE_Resustitucion.append(calcular_error_cuadratico_medio(np.array(datos_y), r))
-					print("vuelta 1.1")
-					modelos.append(sgno)
-
-					with open("MSE_Resustitucion.json","w")as file:
-						json.dump(MSE_Resustitucion, file)	
-		
-	except FileNotFoundError:
-
-		for regla in vec_reglas:
-
+			resistutitucion=False
+		print("Reutilizacion de calculos con archivo activada")
+		for radio in vec_reglas:
 			clustering_method = Clustering(datos)
-			print("vuelta 1")
+			print("Evalua Ra=",radio)
 			### KMeans
 			# clustering_method.kmeans(datos, 3)
 			## Subtractive
-			clustering_method.substractive(regla["Ra"])
+			clustering_method.substractive(radio)
+			sgno = Sugeno()
+			sgno.generar_fis(datos, clustering_method.vec_reglas)
+			r = sgno.evalFIS(np.vstack(datos_x))
+			if (radio in Ra):
+				print("Lo encuentra")
+				i=Ra.index(radio)
+				
+				if(not resistutitucion):
+					MSE_Resustitucion.append(calcular_error_cuadratico_medio(np.array(datos_y), r))
+					
+				else:
+					MSE_Resustitucion.append(MSE_Resustitucion_Arch[i])
+					print(MSE_Resustitucion_Arch[i])
+				MSE_HoldOutRepetido.append(MSE_HoldOutRepetido_Arch[i])
+				print(MSE_HoldOutRepetido_Arch[i])
+			else:
+				print("No lo encuentra")
+				MSE_Resustitucion.append(calcular_error_cuadratico_medio(np.array(datos_y), r))
+				MSE_HoldOutRepetido.append(holdout_repetido(datos_x, datos_y,radio))
+			modelos.append(sgno)
+	except FileNotFoundError:
+		print("no encuentra nada")
+		for radio in vec_reglas:
+			clustering_method = Clustering(datos)
+			print("Evalua Ra=",radio)
+			### KMeans
+			# clustering_method.kmeans(datos, 3)
+			## Subtractive
+			clustering_method.substractive(radio)
 			sgno = Sugeno()
 			sgno.generar_fis(datos, clustering_method.vec_reglas)
 			r = sgno.evalFIS(np.vstack(datos_x))
 			MSE_Resustitucion.append(calcular_error_cuadratico_medio(np.array(datos_y), r))
-			MSE_HoldOutRepetido.append(holdout_repetido(datos_x, datos_y,regla["Ra"]))
-			print("vuelta 1.1")
+			MSE_HoldOutRepetido.append(holdout_repetido(datos_x, datos_y,radio))
 			modelos.append(sgno)
-
+			
+	try:
+		escritura = MSE_HoldOutRepetido - MSE_HoldOutRepetido_Arch
 		with open("MSE_Holdoutrepetido.json","w")as file:
-			json.dump(MSE_HoldOutRepetido, file)
+			json.dump(escritura, file)
+		escritura = MSE_Resustitucion-MSE_Resustitucion_Arch
 		with open("MSE_Resustitucion.json","w")as file:
-			json.dump(MSE_Resustitucion, file)	
-
+			json.dump(escritura, file)	
+		escritura = vec_reglas-Ra
+		with open("Ra.json", "w") as file:
+			json.dump(escritura, file)
+	except FileNotFoundError:
+		print("no se pudo guardar info en archivos")
+	
 	
 	#Graficar el error cuadratico medio (x=radioA y=error cuadratico medio)
 
-	plt.plot([regla["Ra"] for regla in vec_reglas], MSE_Resustitucion)
+	plt.plot([x for x in vec_reglas], MSE_Resustitucion)
 	plt.xlabel("Ra")
 	plt.ylabel("Error cuadrático medio Resustitución")
 	plt.title("Mse de Resustitucion vs Ra")
 	plt.show(block=False)
 
-	plt.plot([regla["Ra"] for regla in vec_reglas], MSE_HoldOutRepetido)
+	plt.plot([x for x in vec_reglas], MSE_HoldOutRepetido)
 	plt.xlabel("Ra")
 	plt.ylabel("Error cuadrático medio Hold Out Repetido")
 	plt.title("Mse Hold Out Repetido vs Ra")
@@ -190,7 +191,7 @@ def main():
 	# Sobremuestrear los datos originales
 	datos_sobremuestreados_y = obtener_datos_sobremuestreados(datos_y)
 	datos_sobremuestreados_x = obtener_datos_sobremuestreados(datos_x)
-	mejor_modelo.viewInputs()
+	mejor_modelo.viewInputs(datos_x_fechas[0])
 	# evaluar modelo Sugeno
 	r = mejor_modelo.evalFIS(np.vstack(datos_sobremuestreados_x))
 	plt.figure()
@@ -198,24 +199,22 @@ def main():
 	plt.plot([datos_x_fechas[0] + pd.to_timedelta(d, unit='D') for d in datos_sobremuestreados_x], r, '--', color='red')
 	plt.xlabel("Años")
 	plt.ylabel("Valor de cierre")
+	valortitulo=vec_reglas[indice_mejor_modelo]
+	plt.title(f"Sobremuestreo para modelo con Ra={valortitulo}")
 	plt.show()
 
 	#extrapolacion es hacer un for creando datos desde el ultimo dato conocido... se puede poner una barra para identificar donde comienza
 	print(mejor_modelo.get_rules())
 	#Inicio extrapolacion
-	datos_futuros_x=generar_datos_futuros(datos_x,100)
-	print(datos)
+	cantdias=365
+	datos_futuros_x=generar_datos_futuros(datos_x,cantdias)
 	recta_extrapolacion=mejor_modelo.evalFIS(np.vstack(datos_futuros_x))
-
-
-	fecha_final_real=datos_x_fechas[0] + pd.to_timedelta(datos_x[-1], unit='D')
 	plt.figure()
-	plt.plot([datos_x_fechas[0] + pd.to_timedelta(d, unit='D') for d in datos_x], datos_y, label="Valores reales" ,color='blue') #Datos originales
+	plt.plot([datos_x_fechas[0] + pd.to_timedelta(d, unit='D') for d in datos_x], datos_y, color='blue') #Datos originales
 	plt.plot([datos_x_fechas[0] + pd.to_timedelta(d, unit='D') for d in datos_futuros_x], recta_extrapolacion , label='Recta extrapolacion', color='r') #Datos extrapolados
-	plt.axvline(x=fecha_final_real, color='black', linestyle='--', label='Inicio de Extrapolación')
 	plt.xlabel("Años")
 	plt.ylabel("Valor de cierre")
-	plt.title("Recta de extrapolacion")
+	plt.title(f"Extrapolacion de {cantdias} dias")
 	plt.show()
 
 	input("Presione enter para finalizar")	

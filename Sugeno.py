@@ -59,9 +59,9 @@ class Sugeno:
 
         return np.sum(acti*inp*coef/sumMu,axis=1)
 
-    def viewInputs(self):
+    def viewInputs(self,fecha):
         for input in self.inputs:
-            input.view()
+            input.view(fecha)
 
     def get_rules(self):
         return self.rules
