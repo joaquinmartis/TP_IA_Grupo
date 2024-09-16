@@ -1,88 +1,49 @@
-import time
 import numpy as np
-from substractive_clustering import substractive_clustering
-#from substractive_clustering_original import subclust2 as substractive_clustering
-from reglas_fis import FISRule
 from inputs_fis import FISInput
-#def gaussmf(data, mean, sigma):
-#        return np.exp(-((data - mean)**2.) / (2 * sigma**2.))
-
-class FIS:
+class Sugeno:
     def __init__(self):
-        self.rules=[]
         self.memberfunc = []
-        self.inputs = []
-
-
+        self.rules = []
+        self.inputs=[]
     
     def __gaussmf(self,data, mean, sigma):
         return np.exp(-((data - mean)**2.) / (2 * sigma**2.))
 
-    def genFIS(self, data, Ra=1.1,Rb=0):
-
-        start_time = time.time()
-        #Clustering con los datos y clasificacion de cada punto a un cluster
-        labels, cluster_center = substractive_clustering(data, Ra,Rb=Rb)
-
-        print("--- %s seconds ---" % (time.time() - start_time))
+    def generar_fis(self, data, centros):
+        cluster_center = centros
         n_clusters = len(cluster_center)
-
         cluster_center = cluster_center[:,:-1]
         P = data[:,:-1]
-        #T = data[:,-1]
         maxValue = np.max(P, axis=0)
         minValue = np.min(P, axis=0)
-
         self.inputs = [FISInput(maxValue[i], minValue[i],cluster_center[:,i]) for i in range(len(maxValue))]
         self.rules = cluster_center
         self.entrenar(data)
-        return labels,n_clusters
 
-    
     
     def entrenar(self, data):
-        not_targets = data[:,:-1] #El ultimo elemento es el target. Agarra todos menos el ultimo
-        targets = data[:,-1] #Agarra el ultimo elemento
-        #P=not_targets
-
-
+        P = data[:,:-1]
+        T = data[:,-1]
         #___________________________________________
         # MINIMOS CUADRADOS (lineal)
         sigma = np.array([(i.maxValue-i.minValue)/np.sqrt(8) for i in self.inputs])
-        f = [np.prod(self.__gaussmf(not_targets,cluster,sigma),axis=1) for cluster in self.rules]
-
+        f = [np.prod(self.__gaussmf(P,cluster,sigma),axis=1) for cluster in self.rules]
         nivel_acti = np.array(f).T
-
         sumMu = np.vstack(np.sum(nivel_acti,axis=1))
-
-        not_targets = np.c_[not_targets, np.ones(len(not_targets))]
-        n_vars = not_targets.shape[1]
-
+        P = np.c_[P, np.ones(len(P))]
+        n_vars = P.shape[1]
         orden = np.tile(np.arange(0,n_vars), len(self.rules))
         acti = np.tile(nivel_acti,[1,n_vars])
-        inp = not_targets[:, orden]
-
-
+        inp = P[:, orden]
         A = acti*inp/sumMu
-
-        # A = np.zeros((N, 2*n_clusters))
-        # for jdx in range(n_clusters):
-        #     for kdx in range(nVar):
-        #         A[:, jdx+kdx] = nivel_acti[:,jdx]*P[:,kdx]/sumMu
-        #         A[:, jdx+kdx+1] = nivel_acti[:,jdx]/sumMu
-
-        b = targets
+        b = T
         solutions, residuals, rank, s = np.linalg.lstsq(A,b,rcond=None)
         self.solutions = solutions #.reshape(n_clusters,n_vars)
         return 0
 
     def evalFIS(self, data):
         sigma = np.array([(input.maxValue-input.minValue) for input in self.inputs])/np.sqrt(8)
-
-        #Vector con vectores de valores de verdad de cada punto de los cluster
         f = [np.prod(self.__gaussmf(data,cluster,sigma),axis=1) for cluster in self.rules]
-
-        
         nivel_acti = np.array(f).T
         sumMu = np.vstack(np.sum(nivel_acti,axis=1))
 
@@ -98,10 +59,9 @@ class FIS:
 
         return np.sum(acti*inp*coef/sumMu,axis=1)
 
-
-    def viewInputs(self):
+    def viewInputs(self,fecha):
         for input in self.inputs:
-            input.view()
+            input.view(fecha)
 
-
-
+    def get_rules(self):
+        return self.rules

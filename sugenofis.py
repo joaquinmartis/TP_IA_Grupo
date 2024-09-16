@@ -13,6 +13,7 @@ __author__ = 'Daniel Albornoz'
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 import time
 from substractive_clustering import substractive_clustering
@@ -130,7 +131,7 @@ def sugenoSPY():
     plt.show(block=False)
 
     fis=FIS()
-    fis.genFIS(data,0.2)
+    fis.genFIS(data,0.6)
     fis.viewInputs()
     r=fis.evalFIS(np.vstack(x))
     plt.figure()
