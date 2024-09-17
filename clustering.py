@@ -28,3 +28,6 @@ class Clustering:
         """
         self.vec_pertenencia, self.vec_reglas  = substractive_clustering(self.data, Ra, Rb)
         self.cant_reglas=len(self.vec_reglas)
+    
+    def cantidad_Reglas(self):
+        print("Cantidad de reglas:", self.cant_reglas)

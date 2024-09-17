@@ -88,7 +88,7 @@ def main():
 	datos=np.vstack((datos_x, datos_y)).T
 	
 	#Generar valores de Ra en ese rango
-	ra_values = np.arange(0.03, 0.1 + 0.01, 0.01)
+	ra_values = np.arange(0.03, 0.1, 0.01)
 
 	#Crear la lista de reglas de manera dinámica
 	vec_reglas = [round(ra,2) for ra in ra_values]
@@ -121,6 +121,7 @@ def main():
 			# clustering_method.kmeans(datos, 3)
 			## Subtractive
 			clustering_method.substractive(radio)
+			clustering_method.cantidad_Reglas()
 			sgno = Sugeno()
 			sgno.generar_fis(datos, clustering_method.vec_reglas)
 			r = sgno.evalFIS(np.vstack(datos_x))
@@ -138,8 +139,13 @@ def main():
 				print(MSE_HoldOutRepetido_Arch[i])
 			else:
 				print("No lo encuentra")
-				MSE_Resustitucion.append(calcular_error_cuadratico_medio(np.array(datos_y), r))
-				MSE_HoldOutRepetido.append(holdout_repetido(datos_x, datos_y,radio))
+				mser=calcular_error_cuadratico_medio(np.array(datos_y), r)
+				MSE_Resustitucion_Arch.append(mser)
+				MSE_Resustitucion.append(mser)
+				mseh=holdout_repetido(datos_x, datos_y,radio)
+				MSE_HoldOutRepetido_Arch.append(mseh)
+				MSE_HoldOutRepetido.append(mseh)
+				Ra.append(radio)
 			modelos.append(sgno)
 	except FileNotFoundError:
 		print("no encuentra nada")
@@ -150,21 +156,28 @@ def main():
 			# clustering_method.kmeans(datos, 3)
 			## Subtractive
 			clustering_method.substractive(radio)
+			clustering_method.cantidad_Reglas()
 			sgno = Sugeno()
 			sgno.generar_fis(datos, clustering_method.vec_reglas)
 			r = sgno.evalFIS(np.vstack(datos_x))
-			MSE_Resustitucion.append(calcular_error_cuadratico_medio(np.array(datos_y), r))
-			MSE_HoldOutRepetido.append(holdout_repetido(datos_x, datos_y,radio))
+			mser=calcular_error_cuadratico_medio(np.array(datos_y), r)
+			MSE_Resustitucion_Arch.append(mser)
+			MSE_Resustitucion.append(mser)
+			mseh=holdout_repetido(datos_x, datos_y,radio)
+			MSE_HoldOutRepetido_Arch.append(mseh)
+			MSE_HoldOutRepetido.append(mseh)
+			Ra.append(radio)
 			modelos.append(sgno)
 			
 	try:
-		escritura = list(dict.fromkeys(MSE_HoldOutRepetido + MSE_HoldOutRepetido_Arch))
+
+		escritura = MSE_HoldOutRepetido_Arch
 		with open("MSE_Holdoutrepetido.json","w")as file:
 			json.dump(escritura, file)
-		escritura = list(dict.fromkeys(MSE_Resustitucion + MSE_Resustitucion_Arch))
+		escritura = MSE_Resustitucion_Arch
 		with open("MSE_Resustitucion.json","w")as file:
-			json.dump(escritura, file)	
-		escritura = list(dict.fromkeys(vec_reglas + Ra))
+			json.dump(escritura, file)
+		escritura = Ra
 		with open("Ra.json", "w") as file:
 			json.dump(escritura, file)
 	except FileNotFoundError:
