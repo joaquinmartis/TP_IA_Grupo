@@ -74,7 +74,6 @@ def holdout_repetido(X, y,Ra, n_splits=5, n_repeats=10, test_size=0.3):
 def main():
 	
 	datos_x, datos_y, datos_x_fechas = leer_datos('spy.csv')
-	print(datos_x)
 	# Graficar los datos
 	plt.figure(figsize=(12, 6))
 	plt.plot(datos_x_fechas, datos_y , label='Precio de Cierre', color='b')
@@ -159,15 +158,15 @@ def main():
 			modelos.append(sgno)
 			
 	try:
-		escritura = set(MSE_HoldOutRepetido) - set(MSE_HoldOutRepetido_Arch)
+		escritura = list(dict.fromkeys(MSE_HoldOutRepetido + MSE_HoldOutRepetido_Arch))
 		with open("MSE_Holdoutrepetido.json","w")as file:
-			json.dump(list(escritura), file)
-		escritura = set(MSE_Resustitucion)-set(MSE_Resustitucion_Arch)
+			json.dump(escritura, file)
+		escritura = list(dict.fromkeys(MSE_Resustitucion + MSE_Resustitucion_Arch))
 		with open("MSE_Resustitucion.json","w")as file:
-			json.dump(list(escritura), file)	
-		escritura = set(vec_reglas)-set(Ra)
+			json.dump(escritura, file)	
+		escritura = list(dict.fromkeys(vec_reglas + Ra))
 		with open("Ra.json", "w") as file:
-			json.dump(list(escritura), file)
+			json.dump(escritura, file)
 	except FileNotFoundError:
 		print("no se pudo guardar info en archivos")
 	
@@ -203,8 +202,6 @@ def main():
 	plt.title(f"Sobremuestreo para modelo con Ra={valortitulo}")
 	plt.show()
 
-	#extrapolacion es hacer un for creando datos desde el ultimo dato conocido... se puede poner una barra para identificar donde comienza
-	print(mejor_modelo.get_rules())
 	#Inicio extrapolacion
 	cantdias=365
 	datos_futuros_x=generar_datos_futuros(datos_x,cantdias)
