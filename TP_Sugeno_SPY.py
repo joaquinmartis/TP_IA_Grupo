@@ -88,7 +88,7 @@ def main():
 	datos=np.vstack((datos_x, datos_y)).T
 	
 	#Generar valores de Ra en ese rango
-	ra_values = np.arange(0.1, 0.4 + 0.1, 0.1)
+	ra_values = np.arange(0.03, 0.1 + 0.01, 0.01)
 
 	#Crear la lista de reglas de manera dinámica
 	vec_reglas = [round(ra,2) for ra in ra_values]
@@ -173,16 +173,11 @@ def main():
 	
 	#Graficar el error cuadratico medio (x=radioA y=error cuadratico medio)
 
-	plt.plot([x for x in vec_reglas], MSE_Resustitucion)
+	plt.plot([x for x in vec_reglas], MSE_Resustitucion,color='blue', label='MSE Resustitución')
+	plt.plot([x for x in vec_reglas], MSE_HoldOutRepetido, color='red', label='MSE Hold Out Repetido')
 	plt.xlabel("Ra")
-	plt.ylabel("Error cuadrático medio Resustitución")
-	plt.title("Mse de Resustitucion vs Ra")
-	plt.show(block=False)
-
-	plt.plot([x for x in vec_reglas], MSE_HoldOutRepetido)
-	plt.xlabel("Ra")
-	plt.ylabel("Error cuadrático medio Hold Out Repetido")
-	plt.title("Mse Hold Out Repetido vs Ra")
+	plt.ylabel("Error cuadrático medio")
+	plt.legend()
 	plt.show()
 
 	indice_mejor_modelo = np.argmin(MSE_HoldOutRepetido)
